@@ -9,6 +9,7 @@ load_dotenv()
 
 client = MongoClient(os.getenv("cluster"))
 db = client.tiktok
+
 game = db.game
 
 
@@ -38,14 +39,13 @@ def play(spots, game_id, choice_round):
         turn = 0
         prev_turn = -1
     else:
-        draw_board(spots)
         turn = 2
         prev_turn = 0
 
     # Цикл гри
     while playing:
         # Чи хід перший?
-        if turn != 0:
+        if turn != 0 and prev_turn != turn:
             # Очікування на хід суперника
             while True:
                 sho = game.find_one({"game_id": game_id})
@@ -60,16 +60,16 @@ def play(spots, game_id, choice_round):
                     break
         # Чи інший гравець не вийшов?
         if playing is False:
+            print('Oponent disconnected')
             break
         # Чи інший гравець не виграв?
-        if complete:
+        if complete and turn % 2 == 0:
+            print("X's won")
+            break
+        elif complete:
+            print("O's won")
             break
 
-
-        #
-
-        if prev_turn == turn:
-            print("Invalid spot selected, please pick another.")
         prev_turn = turn
 
         # Перевіряємо, хто грає
@@ -77,6 +77,7 @@ def play(spots, game_id, choice_round):
             player = "X"
         else:
             player = "O"
+        draw_board(spots)
         print("Player " + f"{player}" + "'s turn: Pick your spot or press q to quit")
 
         choice_round = input()
@@ -121,7 +122,7 @@ def play(spots, game_id, choice_round):
                 )
         except ValueError:
             print("Invalid spot selected, please pick another.")
-
+    return spots
 
 choice = input(
     "Do you want to join a game or start a new one?\n1-Join\n2-Start a new one\n"
@@ -142,13 +143,6 @@ except ValueError:
     raise ValueError("Invalid choice selected, please start again.")
 
 
-play(spots, game_id, choice)
+spots = play(spots, game_id, choice)
 
-# draw_board(spots)
-# if complete:
-#     if player == "X":
-#         print("Player 1 Wins!")
-#     else:
-#         print("Player 2 Wins!")
-# else:
-#     print("No Winner")
+draw_board(spots)
