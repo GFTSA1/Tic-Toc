@@ -7,13 +7,6 @@ def draw_board(spots):
     print(board)
 
 
-def check_turn(turn):
-    if turn % 2 == 0:
-        return "O"
-    else:
-        return "X"
-
-
 def check_for_win(spots):
     if (
         (spots["1"] == spots["2"] == spots["3"])
